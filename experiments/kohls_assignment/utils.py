@@ -11,6 +11,7 @@ from sklearn.metrics import confusion_matrix, roc_auc_score, classification_repo
 
 import matplotlib.pyplot as plt
 
+
 def read_json(path):
     with open(path, 'r') as f:
         file_dict = json.load(f)
@@ -112,40 +113,53 @@ def encode_categorical_features(df: pd.DataFrame, config: dict):
 def concat_dfs(df_list: list):
     return pd.concat(df_list, axis=1)
 
-def save_transformers(transformer,file_name):
-    with open(file_name,"wb") as f:
-        pickle.dump(transformer,f,protocol=pickle.HIGHEST_PROTOCOL)
+
+def save_transformers(transformer, file_name):
+    with open(file_name, "wb") as f:
+        pickle.dump(transformer, f, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 def load_transformers(file_name):
-    with open(file_name,"rb") as f:
+    with open(file_name, "rb") as f:
         return pickle.load(f)
 
-def train_model(X,y,config):
+
+def train_model(X, y, config):
     if config["model"]["type"] == "LogisticRegression":
         clf = LogisticRegression(max_iter=config["model"]["max_iter"])
-        clf.fit(X,y)
+        clf.fit(X, y)
         return clf
 
-def save_model(model,config):
-    with open(os.path.join(config["model_dir"],"model.pkl"),"wb") as f:
-        pickle.dump(model,f,protocol=pickle.HIGHEST_PROTOCOL)
 
-def get_conf_matrix(model,X_test,y_test):
+def save_model(model, config):
+    with open(os.path.join(config["model_dir"], "model.pkl"), "wb") as f:
+        pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def get_conf_matrix(model, X_test, y_test):
     return confusion_matrix(y_test, model.predict(X_test))
+
 
 def confusion_matrix_fig(conf_matrix):
     fig, ax = plt.subplots(figsize=(7.5, 7.5))
     ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.3)
     for i in range(conf_matrix.shape[0]):
         for j in range(conf_matrix.shape[1]):
-            ax.text(x=j, y=i,s=conf_matrix[i, j], va='center', ha='center', size='xx-large')
-    
+            ax.text(x=j, y=i, s=conf_matrix[i, j],
+                    va='center', ha='center', size='xx-large')
+
     plt.xlabel('Predictions', fontsize=18)
     plt.ylabel('Actuals', fontsize=18)
     plt.title('Confusion Matrix', fontsize=18)
     return fig
 
-def get_roc_auc(model,X_test,y_test):
+
+def get_roc_auc(model, X_test, y_test):
     tprobs = model.predict_proba(X_test)[:, 1]
     return roc_auc_score(y_test, tprobs)
 
+
+def load_model(model_path):
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+        return model
